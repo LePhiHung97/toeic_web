@@ -1,0 +1,93 @@
+﻿D:\workspace new\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\Toeic
+
+van hanh bao cao export exel -. lay dk loc
+bao cao nha dat -. ten tite form lay dung = ten bao cao chon dk ko len
+bao cao thong tin nha - ten title = ten bao cao
+
+@tungay
+@denngay
+@TenNhomNhaTC
+@TenTNTC
+@NhomSuCoTC
+@MaHangMucTC
+@loaisucoTC
+
+
+   tuNgay = dateTuNgay.DateTime;
+            denNgay = dateDenNgay.DateTime;
+            int? mann, matn, manhomsc, mahangmuc, maloai;
+            if (lkNhomNha.EditValue == null)
+            {
+                mann = 0;
+            }
+            else
+            {
+                mann = int.Parse(lkNhomNha.EditValue.ToString());
+            }
+            if (lookUpToaNha.EditValue == null)
+            {
+                matn = 0;
+            }
+            else
+            {
+                matn = int.Parse(lookUpToaNha.EditValue.ToString());
+            }
+
+            if (lkNhomSuCo.EditValue == null)
+            {
+                manhomsc = 0;
+            }
+            else
+            {
+                manhomsc = int.Parse(lkNhomSuCo.EditValue.ToString());
+            }
+
+            if (lkHangmuc.EditValue == null)
+                mahangmuc = 0;
+            else
+                mahangmuc = int.Parse(lkHangmuc.EditValue.ToString());
+
+            if (lkLoaisuco.EditValue == null)
+                maloai = 0;
+            else maloai = int.Parse(lkLoaisuco.EditValue.ToString());
+
+
+
+            string fileName = "BC_TongHopSuCoPhatSinh.xlsx";
+            string workSheetName = "Data";
+
+            DataTable dt;
+            try
+            {
+                SqlParameter[] param = new SqlParameter[]
+                {
+                    new SqlParameter("@tungay", tuNgay),
+                    new SqlParameter("@denngay", denNgay),
+                    new SqlParameter("@MaTN", matn),
+                    new SqlParameter("@MaNN", mann),
+                    new SqlParameter("@nhomsuco", manhomsc),                
+                    new SqlParameter("@MaHangMuc", mahangmuc),
+                    new SqlParameter("@loaisuco",maloai)
+                };
+                dt = Library.SqlCommon.ExecuteDataSet("rptDanhSachSuCo", param).Tables[0];
+                if (dt.Rows.Count == 0)
+                {
+                    DialogBox.Alert("Không có dữ liệu thỏa mãn điều kiện lọc!");
+                    return;
+                }
+                SaveFileDialog frm = new SaveFileDialog();
+                frm.Filter = "Excel|*.xlsx";
+                frm.ShowDialog();
+                if (frm.FileName != "")
+                {
+                    if (File.Exists(frm.FileName))
+                        File.Delete(frm.FileName);
+                    ExportToExcel.exporttoExcelTempfile(fileName, workSheetName, dt, frm.FileName);
+                    if (DialogBox.Question("Đã xử lý xong, bạn có muốn xem lại không?") == DialogResult.Yes)
+                        System.Diagnostics.Process.Start(frm.FileName);
+                }
+            }
+            catch
+            {
+                DialogBox.Error("Có lỗi xảy ra!");
+            }
